@@ -20,30 +20,26 @@ jobs:
         id: prepare_source
         run: |
           SOURCE_NAME="${GITHUB_REF#refs/*/}"
-          VERSION_FILE=version.txt
-
-          # Leer la versión actual desde un archivo (version.txt)
-          if [ -f $VERSION_FILE ]; then
-            CURRENT_VERSION=$(cat $VERSION_FILE)
-          else
-            CURRENT_VERSION="0.0"
-          fi
+          
+          # Leer la versión actual desde una variable de entorno o usar '0.0' si no está definida
+          CURRENT_VERSION="${{ env.CURRENT_VERSION || '0.0' }}"
 
           if [ "$SOURCE_NAME" == "main" ]; then
             # Incrementar la parte 'x' de la versión y reiniciar 'y'
             IFS='.' read -r x y <<< "$CURRENT_VERSION"
             NEW_VERSION="$((x + 1)).$y"
             echo "SOURCE_NAME=latest" >> $GITHUB_ENV
-            echo "$((x + 1)).0" > $VERSION_FILE
+            SAVE="$((x + 1)).0"
           else
             # Incrementar la parte 'y' de la versión
             IFS='.' read -r x y <<< "$CURRENT_VERSION"
             NEW_VERSION="$x.$((y + 1))"
             echo "SOURCE_NAME=$NEW_VERSION" >> $GITHUB_ENV
-            echo "$x.$((y + 1))" > $VERSION_FILE
+            SAVE"$x.$((y + 1))"
           fi
 
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "CURRENT_VERSION=$SAVE" >> $GITHUB_ENV
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
