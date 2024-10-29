@@ -1,7 +1,6 @@
 name: API
 
 on:
-  # Trigger: cuando se actualicen las branchs o tags
   push:
     branches:
       - "main"
@@ -14,36 +13,53 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Descarga el repositorio
       - uses: actions/checkout@v2
 
-      # Step 2: Identifica el nombre de la tag / branch de git
       - name: "Prepare source name: Tag or branch name"
         id: prepare_source
         run: |
           SOURCE_NAME="${GITHUB_REF#refs/*/}"
-          [ $SOURCE_NAME == "main" ] && SOURCE_NAME="latest"
-          echo ::set-output name=SOURCE_NAME::${SOURCE_NAME}
-      
-      # Steps 3 y 4: Requisitos QEMU y Buildx
+          VERSION_FILE=version.txt
+
+          # Leer la versión actual desde un archivo (version.txt)
+          if [ -f $VERSION_FILE ]; then
+            CURRENT_VERSION=$(cat $VERSION_FILE)
+          else
+            CURRENT_VERSION="0.0"
+          fi
+
+          if [ "$SOURCE_NAME" == "main" ]; then
+            # Incrementar la parte 'x' de la versión y reiniciar 'y'
+            IFS='.' read -r x y <<< "$CURRENT_VERSION"
+            NEW_VERSION="$((x + 1)).$y"
+            echo "SOURCE_NAME=latest" >> $GITHUB_ENV
+            echo "$((x + 1)).0" > $VERSION_FILE
+          else
+            # Incrementar la parte 'y' de la versión
+            IFS='.' read -r x y <<< "$CURRENT_VERSION"
+            NEW_VERSION="$x.$((y + 1))"
+            echo "SOURCE_NAME=$NEW_VERSION" >> $GITHUB_ENV
+            echo "$x.$((y + 1))" > $VERSION_FILE
+          fi
+
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      # Step 5: Autenticación en el registry
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASS }}
-      
-      # Step 6: Configuración de las variables de entorno
+
       - name: Set up environment variables
         run: |
           echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
 
-      # Step 7: Construcción y publicación de la imagen
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v3
@@ -53,9 +69,7 @@ jobs:
           file: ./Dockerfile
           tags: |
             gastonnicora/remates-socket:${{ env.SOURCE_NAME }}
-        env:
-          SOURCE_NAME: ${{ steps.prepare_source.outputs.SOURCE_NAME }}
+            gastonnicora/remates-socket:${{ env.NEW_VERSION }}
 
-      # Step 8: Muestra el digest de la imagen
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
