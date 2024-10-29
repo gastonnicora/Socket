@@ -75,6 +75,7 @@ jobs:
 
       - name: Commit version.txt
         run: |
+          VERSION_FILE=version.txt
           echo "${{ env.SAVE }}" > $VERSION_FILE
           git config --local user.name "github-actions"
           git config --local user.email "action@github.com"
