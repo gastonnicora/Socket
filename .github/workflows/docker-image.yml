@@ -30,12 +30,12 @@ jobs:
             NEW_VERSION="$((x + 1)).$y"
             echo "SOURCE_NAME=latest" >> $GITHUB_ENV
             SAVE="$((x + 1)).0"
-          else
+          else 
             # Incrementar la parte 'y' de la versión
             IFS='.' read -r x y <<< "$CURRENT_VERSION"
             NEW_VERSION="$x.$((y + 1))"
             echo "SOURCE_NAME=$NEW_VERSION" >> $GITHUB_ENV
-            SAVE"$x.$((y + 1))"
+            SAVE="$x.$((y + 1))"
           fi
 
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
