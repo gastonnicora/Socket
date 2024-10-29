@@ -21,4 +21,4 @@ def create_app(environment="development"):
     socketio.init_app(app)
     
     run_redis_subscriber()
-    return app 
+    return app

@@ -20,9 +20,14 @@ jobs:
         id: prepare_source
         run: |
           SOURCE_NAME="${GITHUB_REF#refs/*/}"
-          
-          # Leer la versión actual desde una variable de entorno o usar '0.0' si no está definida
-          CURRENT_VERSION="${{ env.CURRENT_VERSION || '0.0' }}"
+          VERSION_FILE=version.txt
+
+          # Leer la versión actual desde el archivo (version.txt) o usar '0.0' si no existe
+          if [ -f $VERSION_FILE ]; then
+            CURRENT_VERSION=$(cat $VERSION_FILE)
+          else
+            CURRENT_VERSION="0.0"
+          fi
 
           if [ "$SOURCE_NAME" == "main" ]; then
             # Incrementar la parte 'x' de la versión y reiniciar 'y'
@@ -35,11 +40,11 @@ jobs:
             IFS='.' read -r x y <<< "$CURRENT_VERSION"
             NEW_VERSION="$x.$((y + 1))"
             echo "SOURCE_NAME=$NEW_VERSION" >> $GITHUB_ENV
-            SAVE="$x.$((y + 1))"
+            SAVE="$NEW_VERSION"
           fi
 
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-          echo "CURRENT_VERSION=$SAVE" >> $GITHUB_ENV
+          echo "SAVE=$SAVE" >> $GITHUB_ENV
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -67,6 +72,15 @@ jobs:
           tags: |
             gastonnicora/remates-socket:${{ env.SOURCE_NAME }}
             gastonnicora/remates-socket:${{ env.NEW_VERSION }}
+
+      - name: Commit version.txt
+        run: |
+          echo "${{ env.SAVE }}" > $VERSION_FILE
+          git config --local user.name "github-actions"
+          git config --local user.email "action@github.com"
+          git add $VERSION_FILE
+          git commit -m "Update version.txt to $SAVE" || echo "No changes to commit"
+          git push
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
