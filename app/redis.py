@@ -9,7 +9,7 @@ redis_host = environ.get("REDIS_HOST", "localhost")
 redis_client = redis.Redis(host=redis_host, port=6379)
 
 
-
+ 
 # Función para manejar mensajes de Redis
 def handle_message(message):
     if message['type'] == 'message':
