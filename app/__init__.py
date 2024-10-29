@@ -8,7 +8,7 @@ from app.socketio import socketio
 from app.redis import run_redis_subscriber
 
 def create_app(environment="development"):
-
+ 
     # Configuración inicial de la app   
     app = Flask(__name__)
     app.jinja_env.line_statement_prefix = '#'
