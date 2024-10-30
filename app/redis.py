@@ -3,7 +3,6 @@ import redis
 from os import environ
 import threading
 import json
-from app import socketio
 
 redis_host = environ.get("REDIS_HOST", "localhost")
 redis_client = redis.Redis(host=redis_host, port=6379)
@@ -21,7 +20,7 @@ def handle_message(message):
 # Suscripción a mensajes de Redis
 def subscribe_to_redis():
     pubsub = redis_client.pubsub()
-    pubsub.subscribe(**{'task_channel': handle_message})
+    pubsub.subscribe(**{'task_socket_channel': handle_message})
     print('Listening for messages on task_channel...')
     for message in pubsub.listen():
         if message['type'] == 'message':
