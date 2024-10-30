@@ -53,11 +53,16 @@ def start(data):
     start(data)
     return
 
+def emit_updateSesion(data):
+    from app.socketio import emit_updateSesion
+    emit_updateSesion(data)
+    return
 
 tasks = {
     "emit_bid": emit_bid,
     "emit_finish": emit_finish,
     "emit_start": emit_start,
-    "start":start
+    "start":start,
+    "emit_updateSesion":emit_updateSesion
 
 }
