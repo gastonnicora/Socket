@@ -34,12 +34,12 @@ def run_redis_subscriber():
 
 def emit_bid(data):
     from app.socketio import emit_bid
-    emit_bid(data)
+    emit_bid(data["data"])
     return
 
 def emit_finish(data):
     from app.socketio import emit_finish
-    emit_finish(data)
+    emit_finish(data["room"])
     return
 
 def emit_start(data):
@@ -49,12 +49,12 @@ def emit_start(data):
 
 def start(data):
     from app.socketio import start
-    start(data)
+    start(data["room"])
     return
 
 def emit_updateSesion(data):
     from app.socketio import emit_updateSesion
-    emit_updateSesion(data)
+    emit_updateSesion(data["data"])
     return
 
 tasks = {
