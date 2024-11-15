@@ -183,16 +183,6 @@ Este proyecto se ejecuta utilizando Docker y depende de los siguientes servicios
     - **socket**: Contenedor para gestionar las conexiones WebSocket en tiempo real.
     - **web**: Contenedor con la interfaz de usuario 
 
-
-3. **Accede a la API**:
-
-    Una vez que los contenedores estén levantados, puedes acceder a la API en la siguiente dirección:
-
-    ```arduino
-    http://localhost:4001
-    ```
-    Las rutas de la API estarán disponibles a través de este servidor.
-
 ## Detener los Contenedores
 Para detener y eliminar los contenedores en ejecución, ejecuta el siguiente comando:
 
